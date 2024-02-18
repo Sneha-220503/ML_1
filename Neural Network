@@ -1,0 +1,80 @@
+import java.util.Scanner;
+
+class NeuralNetwork {
+    private int numLayers;
+    private int[] numNodes;
+    private double[][] weights;
+
+    public NeuralNetwork(int numLayers, int[] numNodes) {
+        this.numLayers = numLayers;
+        this.numNodes = numNodes;
+        this.weights = new double[numLayers - 1][];
+
+        for (int i = 0; i < numLayers - 1; i++) {
+            weights[i] = new double[numNodes[i] * numNodes[i + 1]];
+        }
+    }
+
+    public void setEdgeWeight(int sourceNode, int destinationNode, double weight) {
+        int sourceLayer = sourceNode / numNodes[sourceNode];
+        int destinationLayer = destinationNode / numNodes[destinationNode];
+
+        if (sourceLayer + 1 == destinationLayer) {
+            int weightIndex = sourceNode % numNodes[sourceNode] + numNodes[sourceNode] * destinationNode % numNodes[destinationNode];
+            weights[sourceLayer][weightIndex] = weight;
+        } else {
+            System.out.println("Error: Invalid connection between nodes.");
+        }
+    }
+
+    public double getEdgeWeight(int sourceNode, int destinationNode) {
+        int sourceLayer = sourceNode / numNodes[sourceNode];
+        int destinationLayer = destinationNode / numNodes[destinationNode];
+
+        if (sourceLayer + 1 == destinationLayer) {
+            int weightIndex = sourceNode % numNodes[sourceNode] + numNodes[sourceNode] * destinationNode % numNodes[destinationNode];
+            return weights[sourceLayer][weightIndex];
+        } else {
+            System.out.println("Error: Invalid connection between nodes.");
+            return -1; // Return a default value indicating an error
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of layers: ");
+        int numLayers = scanner.nextInt();
+
+        int[] numNodes = new int[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+            System.out.print("Enter the number of nodes in layer " + (i + 1) + ": ");
+            numNodes[i] = scanner.nextInt();
+        }
+
+        NeuralNetwork neuralNetwork = new NeuralNetwork(numLayers, numNodes);
+
+        for (int i = 0; i < numLayers - 1; i++) {
+            for (int j = 0; j < numNodes[i] * numNodes[i + 1]; j++) {
+                System.out.print("Enter weight for edge from node " + (j % numNodes[i]) + " in layer " + (i + 1) +
+                        " to node " + (j % numNodes[i + 1]) + " in layer " + (i + 2) + ": ");
+                neuralNetwork.setEdgeWeight(j % numNodes[i] + numNodes[i] * (i + 1), j % numNodes[i + 1] + numNodes[i + 1] * (i + 2), scanner.nextDouble());
+            }
+        }
+
+        System.out.print("Enter source node: ");
+        int sourceNode = scanner.nextInt();
+
+        System.out.print("Enter destination node: ");
+        int destinationNode = scanner.nextInt();
+
+        double edgeWeight = neuralNetwork.getEdgeWeight(sourceNode, destinationNode);
+        if (edgeWeight != -1) {
+            System.out.println("Weight of the edge from node " + sourceNode + " to node " + destinationNode + ": " + edgeWeight);
+        }
+
+        scanner.close();
+    }
+}
